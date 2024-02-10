@@ -122,10 +122,18 @@ void WifiWrap::onWifiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
     Serial.println("HTTP server started");
 }
 
+void WifiWrap::onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info){
+    Serial.println("Disconnected from WiFi access point");
+    Serial.print("WiFi lost connection. Reason: ");
+    Serial.println(info.wifi_sta_disconnected.reason);
+    Serial.println("Trying to Reconnect");
+    WiFi.reconnect();
+}
 
 void WifiWrap::run()
 {
     WiFi.onEvent(std::bind(&WifiWrap::onWifiGotIP, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
+    WiFi.onEvent(std::bind(&WifiWrap::onDisconnected, this, std::placeholders::_1, std::placeholders::_2), WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
 
     connect(state.getSsid(), state.getPwd());
 

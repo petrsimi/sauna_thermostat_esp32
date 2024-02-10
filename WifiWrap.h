@@ -18,6 +18,7 @@ class WifiWrap {
         void handleRoot();
 
         void onWifiGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
+        void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
 
         void connect(String ssid, String pwd);
 
