@@ -20,7 +20,7 @@ button {font-size:40pt;width:90pt;height:90pt;margin:10pt;}\
 <button type='submit' name='btnPlus' id='btnPlus'>+</button>\
 <button type='submit' name='btnOnOff' id='btnOnOff' class='%s'>ON</button>\
 <p>\
-<button style='width:400pt;' onClick='window.location.reload();' id='btnAktual'>Aktualizovat</button>\
+<button style='width:400pt;' onClick='window.location.href=window.location.href; return false;' id='btnAktual'>Aktualizovat</button>\
 <button type='submit' name='btnVent' id='btnVent' class='%s'>Vent</button>\
 </p>\
 </form>\
