@@ -53,11 +53,16 @@ class State {
 
         bool isWifiCredentialsChanged();
 
+        void toggleTimer();
+
+        int32_t seconds;
+
+
     private:
         ezBuzzer& buzzer;
 
         Timer<1, millis> timer_shutdown;
-
+        Timer<1, millis> timer;
 
         uint16_t temp;
         uint8_t target;

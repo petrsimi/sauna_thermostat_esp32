@@ -20,8 +20,11 @@ button {font-size:40pt;width:90pt;height:90pt;margin:10pt;}\
 <button type='submit' name='btnPlus' id='btnPlus'>+</button>\
 <button type='submit' name='btnOnOff' id='btnOnOff' class='%s'>ON</button>\
 <p>\
-<button style='width:400pt;' onClick='window.location.href=window.location.href; return false;' id='btnAktual'>Aktualizovat</button>\
+<button style='width:400pt;' type='submit' name='btnTimer' id='btnTimer' class='%s'>%02u:%02u</button>\
 <button type='submit' name='btnVent' id='btnVent' class='%s'>Vent</button>\
+</p>\
+<p>\
+<button style='width:510pt;' onClick='window.location.href=window.location.href; return false;' id='btnAktual'>Aktualizovat</button>\
 </p>\
 </form>\
 </body>\
@@ -52,7 +55,15 @@ void WifiWrap::handleRoot()
         if (server.argName(i) == "btnVent") {
             state.setVent(!state.getVent());
         }
+        if (server.argName(i) == "btnTimer") {
+            state.toggleTimer();
+        }
         //Serial.println(server.argName(i) + ": " + server.arg(i));
+    }
+
+    int32_t sec = state.seconds;
+    if (sec < 0) {
+        sec = 0;
     }
 
     char buffer[1024] = {0};
@@ -61,7 +72,13 @@ void WifiWrap::handleRoot()
         state.getTempWhole(),
         state.getTempDecimal(),
         state.getTarget(),
+        // button ON
         state.getState() == OFF ? "" : "stisk",
+        // button timer
+        state.seconds < 0 ? "" : "stisk",
+        sec / 60,
+        sec % 60,
+        // button ventilator
         state.getVent() == false ?  "" : "stisk"
     );
 

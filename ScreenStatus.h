@@ -27,8 +27,7 @@ class ScreenStatus : public Screen {
         uint16_t getTempColor();
         void displayTemperature(uint16_t value, uint16_t color);
         void displayTarget(uint8_t value, uint16_t color);
-
-        static bool timer_cb(void* ptr);
+        void displayTimer();
 
         State& state;
 
@@ -36,6 +35,7 @@ class ScreenStatus : public Screen {
         uint8_t target_last;
         state_t state_last;
         bool vent_last;
+        uint32_t seconds_last;
 
         ButtonWidget btnMinus;
         ButtonWidget btnPlus;
@@ -43,8 +43,4 @@ class ScreenStatus : public Screen {
         ButtonWidget btnCfg;
         ButtonWidget btnVent;
         ButtonWidget btnTimer;
-
-        Timer<1, millis> timer;
-
-        uint32_t seconds;
 };

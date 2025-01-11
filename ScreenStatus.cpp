@@ -4,41 +4,6 @@
 
 
 
-bool ScreenStatus::timer_cb(void* ptr)
-{
-    ScreenStatus *scr = (ScreenStatus*)ptr;
-
-    bool cont = false;
-
-    // Beep every 5 minutes
-    if (scr->seconds == 5 * 60) {
-        scr->state.beep(1);
-    } else if (scr->seconds == 10 * 60) {
-        scr->state.beep(2);
-    } else if (scr->seconds == 15 * 60) {
-        scr->state.beep(3);
-    }
-
-    if (scr->seconds < 15 * 60) {
-        char buff[10];
-        snprintf(buff, 9, "%02u:%02u", scr->seconds / 60, scr->seconds % 60);
-
-        scr->tft.setFreeFont(FMB18);
-        scr->btnTimer.initButton(160, 140, 140, 60, TFT_WHITE, TFT_BLACK, TFT_WHITE, buff, 1);
-        scr->btnTimer.drawButton(true);
-
-        cont = true;
-    } else {
-        scr->tft.setFreeFont(FSS12);
-        scr->btnTimer.initButton(160, 140, 140, 60, TFT_WHITE, TFT_BLACK, TFT_WHITE, "Stopky", 1);
-        scr->btnTimer.drawButton(false);
-    }
-
-    scr->seconds++;
-
-    return cont;
-}
-
 ScreenStatus::ScreenStatus(TFT_eSPI &tft, State& state) :
     Screen(tft),
     state(state),
@@ -92,6 +57,23 @@ void ScreenStatus::displayTarget(uint8_t value, uint16_t color) {
 }
 
 
+void ScreenStatus::displayTimer()
+{
+    if (state.seconds >= 0) {
+        char buff[10];
+        snprintf(buff, 9, "%02u:%02u", state.seconds / 60, state.seconds % 60);
+
+        tft.setFreeFont(FMB18);
+        btnTimer.initButton(160, 140, 140, 60, TFT_WHITE, TFT_BLACK, TFT_WHITE, buff, 1);
+        btnTimer.drawButton(true);
+    } else {
+        tft.setFreeFont(FSS12);
+        btnTimer.initButton(160, 140, 140, 60, TFT_WHITE, TFT_BLACK, TFT_WHITE, "Stopky", 1);
+        btnTimer.drawButton(false);
+    }
+}
+
+
 
 void ScreenStatus::display()
 {
@@ -109,6 +91,7 @@ void ScreenStatus::display()
 
     displayTemperature(state.getTemp(), getTempColor());
     displayTarget(state.getTarget(), TFT_WHITE);
+    displayTimer();
 }
 
 
@@ -131,6 +114,7 @@ void ScreenStatus::tick()
     uint8_t curr_target = state.getTarget();
     state_t curr_state = state.getState();
     bool curr_vent = state.getVent();
+    uint32_t curr_seconds = state.seconds;
 
     // Update displayed temperature
     if ((temp_last / 128) != (curr_temp / 128) ||
@@ -167,13 +151,16 @@ void ScreenStatus::tick()
         btnVent.drawButton(false);
     }
 
-    timer.tick();
-
+    // Update timer
+    if (curr_seconds != seconds_last) {
+        displayTimer();
+    }
 
     temp_last = curr_temp;
     state_last = curr_state;
     target_last = curr_target;
     vent_last = curr_vent;
+    seconds_last = curr_seconds;
 }
 
 
@@ -259,15 +246,7 @@ void ScreenStatus::handle_buttons(TSPoint& p)
 
     // Handle Timer button
     if (btnTimer.justPressed()) {
-        if (timer.empty()) { // timer is not running
-            seconds = 0;
-            timer_cb(this);
-            timer.every(1000, timer_cb, this);
-        } else {
-            timer.cancel();
-            tft.setFreeFont(FSS12);
-            btnTimer.initButton(160, 140, 140, 60, TFT_WHITE, TFT_BLACK, TFT_WHITE, "Stopky", 1);
-            btnTimer.drawButton(false);
-        }
+        state.toggleTimer();
+        displayTimer();
     }
 }
