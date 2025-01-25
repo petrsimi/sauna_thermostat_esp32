@@ -16,6 +16,10 @@ class WifiWrap {
 
     private:
         void handleRoot();
+        void handleUpdate();
+        void handleUpload();
+        void handleUploadDone();
+
 
         void onWifiGotIP(WiFiEvent_t event, WiFiEventInfo_t info);
         void onDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
