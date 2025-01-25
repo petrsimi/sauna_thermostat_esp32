@@ -18,6 +18,32 @@ static bool timer_shutdown_cb(void* ptr)
 }
 
 
+static bool timer_cb(void* ptr)
+{
+    State *state = (State*)ptr;
+
+    bool cont = false;
+
+    // Beep every 5 minutes
+    if (state->seconds == 5 * 60) {
+        state->beep(1);
+    } else if (state->seconds == 10 * 60) {
+        state->beep(2);
+    } else if (state->seconds == 15 * 60) {
+        state->beep(3);
+    }
+
+    if (state->seconds < 15 * 60) {
+        state->seconds++;
+        cont = true;
+    } else {
+        state->seconds = -1;
+    }
+
+    return cont;
+}
+
+
 State::State(ezBuzzer& buzzer)
    : buzzer(buzzer)
 {
@@ -27,6 +53,7 @@ State::State(ezBuzzer& buzzer)
     screen = SCREEN_STATUS;
     vent = false;
     reconnect = false;
+    seconds = -1;
 }
 
 
@@ -54,7 +81,20 @@ void State::init()
 void State::tick()
 {
     timer_shutdown.tick();
+    timer.tick();
     buzzer.loop();
+}
+
+
+void State::toggleTimer()
+{
+    if (timer.empty()) { // timer is not running
+        seconds = 0;
+        timer.every(1000, timer_cb, this);
+    } else {
+        timer.cancel();
+        seconds = -1;
+    }
 }
 
 
